@@ -52,12 +52,15 @@ class Item(Resource):
 
         item = ItemModel.find_by_name(name)
 
-        if item is None:
-            item = ItemModel(name, **data)
-        else:
+        if item:
             item.price = data['price']
+        else:
+            item = ItemModel(name, **data)
 
-        item.save_to_db()
+        try:
+            item.save_to_db()
+        except:
+            return {"message": "An error occurred inserting the item."}, 500
 
         return item.json()
 
@@ -65,4 +68,4 @@ class Item(Resource):
 class ItemList(Resource):
     # @jwt_required()
     def get(self):
-        return {'items': [x.json() for x in ItemModel.query.all()]}
+        return {'items': [x.json() for x in ItemModel.find_all()]}
